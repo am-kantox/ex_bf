@@ -8,11 +8,10 @@ defmodule ExBf.Application do
   @impl true
   def start(_type, _args) do
     children = [
-      {Registry, keys: :unique, name: ExBf.Cells}
+      {Registry, keys: :unique, name: ExBf.Cells},
+      {PartitionSupervisor, child_spec: DynamicSupervisor, name: ExBf.CellsSupervisors}
     ]
 
-    # See https://hexdocs.pm/elixir/Supervisor.html
-    # for other strategies and supported options
     opts = [strategy: :one_for_one, name: ExBf.Supervisor]
     Supervisor.start_link(children, opts)
   end

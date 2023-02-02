@@ -40,10 +40,18 @@ defmodule ExBf do
     parse(rest, acc)
   end
 
-  defp ensure_process(idx) do
-    name = {:via, Registry, {ExBf.Cells, idx}}
+  def parse("," <> rest, %{idx: idx} = acc) do
+    idx |> ensure_process() |> get_value()
+    parse(rest, acc)
+  end
 
-    case ExBf.Cell.start_link(0, name: name) do
+  def parse("." <> rest, %{idx: idx} = acc) do
+    idx |> ensure_process() |> put_value()
+    parse(rest, acc)
+  end
+
+  defp ensure_process(idx) do
+    case ExBf.Cell.start_link(idx: idx) do
       {:ok, pid} -> pid
       {:error, {:already_started, pid}} -> pid
     end
@@ -51,4 +59,11 @@ defmodule ExBf do
 
   defp inc_value(pid), do: GenServer.cast(pid, :+)
   defp dec_value(pid), do: GenServer.cast(pid, :-)
+
+  defp get_value(pid) do
+    [value] = "" |> IO.getn() |> to_charlist()
+    GenServer.cast(pid, {:",", value})
+  end
+
+  defp put_value(pid), do: GenServer.cast(pid, :.)
 end
