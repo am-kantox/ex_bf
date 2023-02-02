@@ -2,13 +2,14 @@ defmodule ExBf.Cell do
   @moduledoc false
   use GenServer
 
-  def start_link(idx: idx) do
+  def start_link(id, idx) do
     DynamicSupervisor.start_child(
-      {:via, PartitionSupervisor, {ExBf.CellsSupervisors, idx}},
+      {:via, PartitionSupervisor, {{:via, Registry, {ExBf.Sessions, id}}, idx}},
       %{
         id: GenServer,
         start:
-          {GenServer, :start_link, [__MODULE__, 0, [name: {:via, Registry, {ExBf.Cells, idx}}]]}
+          {GenServer, :start_link,
+           [__MODULE__, 0, [name: {:via, Registry, {ExBf.Cells, {id, idx}}}]]}
       }
     )
   end
@@ -31,8 +32,5 @@ defmodule ExBf.Cell do
 
   @impl GenServer
   @doc false
-  def handle_cast(:., value) do
-    IO.write(<<value>>)
-    {:noreply, value}
-  end
+  def handle_call(:., _from, value), do: {:reply, value, value}
 end

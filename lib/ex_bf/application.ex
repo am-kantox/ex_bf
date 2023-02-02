@@ -8,11 +8,20 @@ defmodule ExBf.Application do
   @impl true
   def start(_type, _args) do
     children = [
+      {Registry, keys: :unique, name: ExBf.Sessions},
       {Registry, keys: :unique, name: ExBf.Cells},
-      {PartitionSupervisor, child_spec: DynamicSupervisor, name: ExBf.CellsSupervisors}
+      {DynamicSupervisor, name: ExBf.Sessions.Supervisor}
     ]
 
     opts = [strategy: :one_for_one, name: ExBf.Supervisor]
     Supervisor.start_link(children, opts)
+  end
+
+  def start_session(id) do
+    DynamicSupervisor.start_child(
+      ExBf.Sessions.Supervisor,
+      {PartitionSupervisor,
+       child_spec: DynamicSupervisor, name: {:via, Registry, {ExBf.Sessions, id}}}
+    )
   end
 end

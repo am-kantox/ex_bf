@@ -10,8 +10,58 @@ defmodule ExBfTest do
              |> Enum.reverse()
              |> Enum.join()
              |> ExBf.parse()
-
-             Process.sleep(1_000)
            end) == "A"
+  end
+
+  test "calculates 2 + 5 and prints it out" do
+    input = """
+          ++
+          > +++++
+          [<+>-]
+          ++++ ++++
+          [
+          < +++ +++
+          > -
+          ]
+          < .
+    """
+
+    assert capture_io(fn -> ExBf.parse(input) end) == "7"
+  end
+
+  test "prints hello world" do
+    input = """
+    ++++++++            
+    [
+      >++++               
+      [                   
+        >++             
+        >+++            
+        >+++            
+        >+              
+        <<<<-           
+      ]
+
+      >+                  
+      >+                  
+      >-                  
+      >>+                 
+      [<]                 
+                        
+      <-                  
+    ]
+
+    >>.                 
+    >---.                   
+    +++++++..+++.           
+    >>.                     
+    <-.                     
+    <.                      
+    +++.------.--------.    
+    >>+.                    
+    >++.
+    """
+
+    assert capture_io(fn -> ExBf.parse(input) end) == "Hello World!\n"
   end
 end
